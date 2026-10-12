@@ -36,11 +36,9 @@
     {% endif %}
 
     {% paginate search.results by products_per_page %}
-      {% assign color_card_filters = nil %}
       {% if search.results_count > 0 %}
         {% content_for 'block', type: 'filters', id: 'filters', results: search, results_size: search.results_count %}
         {% assign products = search.results | where: 'object_type', 'product' %}
-        {% assign color_card_filters = search.filters %}
       {% else %}
         {% assign collection = settings.empty_state_collection | default: collections.all %}
         {% assign default_title = 'content.search_results_resource_products' | t %}
@@ -50,74 +48,20 @@
 
       {% capture children %}
         {% for product in products %}
-          {% capture color_card_state %}
-            {% if section.settings.show_each_color_as_own_card %}
-              {% render 'color-card-list', product: product, filters: color_card_filters %}
-            {% else %}
-              single
-            {% endif %}
-          {% endcapture %}
-          {% assign color_card_state = color_card_state | strip | split: '|' %}
-
-          {% if color_card_state[0] == 'colors' %}
-            {% assign color_option = nil %}
-            {% for product_option in product.options_with_values %}
-              {% assign option_name = product_option.name | downcase | strip %}
-              {% if option_name == 'color' or option_name == 'colour' %}
-                {% assign color_option = product_option %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-
-            {% assign color_card_entries = color_card_state[1] | split: ';' %}
-            {% for color_card_entry in color_card_entries %}
-              {% assign color_card_fields = color_card_entry | split: ',' %}
-              {% if color_card_fields.size == 3 %}
-                {% assign color_value_index = color_card_fields[0] | plus: 0 %}
-                {% assign color_variant_index = color_card_fields[1] | plus: 0 %}
-                {% assign color_option_value = color_option.values[color_value_index] %}
-                {% assign color_card_value = color_option_value.name %}
-                {% assign color_card_variant = product.variants[color_variant_index] %}
-                {% assign color_card_available = false %}
-                {% if color_card_fields[2] == '1' %}
-                  {% assign color_card_available = true %}
-                {% endif %}
-                <li
-                  id="{{ section.id }}-{{ product.id }}-{{ color_card_variant.id }}"
-                  class="product-grid__item product-grid__item--color"
-                  data-page="{{ paginate.current_page }}"
-                  data-product-id="{{ product.id }}"
-                  data-variant-id="{{ color_card_variant.id }}"
-                  ref="cards[]"
-                >
-                  {% render 'color-product-card',
-                    product: product,
-                    color_card_value: color_card_value,
-                    color_card_variant: color_card_variant,
-                    color_card_available: color_card_available,
-                    section: section,
-                    section_id: section.id,
-                    product_view_context: 'search'
-                  %}
-                </li>
-              {% endif %}
-            {% endfor %}
-          {% elsif color_card_state[0] == 'single' %}
-            <li
-              id="{{ section.id }}-{{ product.id }}"
-              class="product-grid__item product-grid__item--{{ forloop.index0 }}"
-              data-page="{{ paginate.current_page }}"
-              data-product-id="{{ product.id }}"
-              ref="cards[]"
-            >
-              {% content_for 'block',
-                type: '_product-card',
-                id: 'product-card',
-                closest.product: product,
-                product_view_context: 'search'
-              %}
-            </li>
-          {% endif %}
+          <li
+            id="{{ section.id }}-{{ product.id }}"
+            class="product-grid__item product-grid__item--{{ forloop.index0 }}"
+            data-page="{{ paginate.current_page }}"
+            data-product-id="{{ product.id }}"
+            ref="cards[]"
+          >
+            {% content_for 'block',
+              type: '_product-card',
+              id: 'product-card',
+              closest.product: product,
+              product_view_context: 'search'
+            %}
+          </li>
         {% endfor %}
       {% endcapture %}
 
@@ -213,12 +157,6 @@
       "step": 4,
       "default": 24,
       "visible_if": "{{ section.settings.enable_infinite_scroll == false }}"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_each_color_as_own_card",
-      "label": "t:settings.show_each_color_as_own_card",
-      "default": true
     },
     {
       "type": "header",

@@ -5,6 +5,7 @@
   @param {object} color_card_variant - The first available variant for this color, or first matching variant when sold out
   @param {string} color_card_value - The color option value represented by this card
   @param {boolean} color_card_available - Whether any variant of this color is available
+  @param {boolean} color_card - Enables color-specific rendering
   @param {object} section - The containing section
   @param {string} section_id - The containing section ID
   @param {string} [product_view_context] - Context value for standard view events
@@ -87,6 +88,7 @@
   color_card_variant: color_card_variant,
   color_card_value: color_card_value,
   color_card_available: color_card_available,
+  color_card: color_card,
   product_card_gap: 16,
   product_card_id_prefix: section.id
 %}

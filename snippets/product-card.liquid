@@ -11,10 +11,16 @@
   @param {object} [color_card_variant] - The representative variant for a color-specific card
   @param {string} [color_card_value] - The color option value represented by this card
   @param {boolean} [color_card_available] - Whether any variant of this color is available
+  @param {boolean} [color_card] - Explicitly enables color-specific card behavior
   @param {string} [product_card_id_prefix] - Prefix to keep standalone card link IDs unique
 {%- enddoc -%}
 
 {% assign block_settings = block.settings %}
+{% unless color_card %}
+  {% assign color_card_variant = nil %}
+  {% assign color_card_value = nil %}
+  {% assign color_card_available = nil %}
+{% endunless %}
 
 {% if request.visual_preview_mode %}
   {% style %}

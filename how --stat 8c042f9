@@ -1,0 +1,23 @@
+[33mcommit 8c042f9944b08d2a3fa92a38a5313da33789cf1b[m
+Author: ToobaZainab <toobazia59@gmail.com>
+Date:   Mon Oct 12 12:48:22 2026 +0500
+
+    Filter product gallery media by selected color
+    
+    Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+ assets/media-gallery.js                            |  63 [32m+++++[m[31m---[m
+ blocks/_product-media-gallery.liquid               |  12 [31m--[m
+ snippets/product-media-color-filter-item.liquid    |  34 [31m-----[m
+ snippets/product-media-color-filter-state.liquid   |  85 [32m++++++[m[31m-----[m
+ .../product-media-color-hidden-attribute.liquid    |  15 [32m++[m
+ snippets/product-media-color-keys.liquid           |  78 [31m----------[m
+ snippets/product-media-color-segment.liquid        |  27 [32m++++[m
+ snippets/product-media-gallery-classes.liquid      |  25 [32m+++[m
+ .../product-media-gallery-content-styles.liquid    |   4 [32m+[m
+ snippets/product-media-gallery-content.liquid      | 168 [32m+++++++++++++++++[m[31m----[m
+ snippets/product-selected-color-key.liquid         |  34 [31m-----[m
+ snippets/slideshow-controls.liquid                 |  90 [32m++++++[m[31m-----[m
+ snippets/slideshow-slide.liquid                    |   4 [32m+[m[31m-[m
+ templates/product.json                             |   2 [31m-[m
+ 14 files changed, 336 insertions(+), 305 deletions(-)

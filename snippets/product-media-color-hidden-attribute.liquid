@@ -1,0 +1,15 @@
+{% doc %}
+  Returns the hidden attribute for media that does not match the selected color.
+
+  @param {string} media_color - The filename color segment or "all"
+  @param {string} has_color_option - "true" when the product has a Color or Colour option
+  @param {string} selected_color_key - The handleized selected color
+  @param {string} has_selected_color_media - "true" when the color has matching media
+
+  @example
+  {% render 'product-media-color-hidden-attribute', media_color: media_color, has_color_option: true, selected_color_key: 'dusk-blue', has_selected_color_media: true %}
+{% enddoc %}
+
+{%- if has_color_option == 'true' and selected_color_key != blank and has_selected_color_media == 'true' and media_color != 'all' and media_color != selected_color_key -%}
+  hidden
+{%- endif -%}

@@ -1,67 +1,70 @@
-{%- doc -%}
-  Returns whether the selected color matches any media and the initial visible media count.
+{% doc %}
+  Returns Color option metadata and the visible media count for the selected variant.
 
-  @param {object} product - The product whose Color option values are recognized
+  @param {object} product - The product whose Color or Colour option is inspected
   @param {object[]} media_items - The media items rendered by the gallery
-  @param {string} aliases - Optional newline-separated color aliases
-  @param {string} selected_color_key - Normalized selected Color option value
+  @param {object} variant - The selected or first available variant
+  @param {string} page_type - The current Shopify page type
 
   @example
-  {% render 'product-media-color-filter-state',
-    product: product,
-    media_items: product.media,
-    aliases: block.settings.color_media_aliases,
-    selected_color_key: 'black'
-  %}
-{%- enddoc -%}
+  {% render 'product-media-color-filter-state', product: product, media_items: product.media, variant: product.selected_or_first_available_variant, page_type: request.page_type %}
+{% enddoc %}
 
 {%- liquid
+  assign color_option_position = 0
+  if page_type == 'product'
+    for product_option in product.options_with_values
+      assign option_name = product_option.name | downcase
+      if option_name == 'color' or option_name == 'colour'
+        assign color_option_position = product_option.position
+        break
+      endif
+    endfor
+  endif
+
+  assign selected_color_value = ''
+  case color_option_position
+    when 1
+      assign selected_color_value = variant.option1
+    when 2
+      assign selected_color_value = variant.option2
+    when 3
+      assign selected_color_value = variant.option3
+  endcase
+  assign selected_color_key = selected_color_value | handleize
   assign has_selected_color_media = false
   assign initial_visible_media_count = media_items.size
-  assign first_visible_media_index = 0
 
-  if selected_color_key != blank
-    assign selected_color_token = ',' | append: selected_color_key | append: ','
-
+  if color_option_position > 0 and selected_color_key != blank
     for media in media_items
-      capture media_color_keys
-        render 'product-media-color-keys', product: product, media: media, aliases: aliases
+      capture media_color
+        render 'product-media-color-segment', media: media
       endcapture
-      assign media_color_keys = media_color_keys | strip
-      assign padded_media_colors = ',' | append: media_color_keys | append: ','
-
-      if padded_media_colors contains selected_color_token
+      assign media_color = media_color | strip
+      if media_color != 'all' and media_color == selected_color_key
         assign has_selected_color_media = true
+        break
       endif
     endfor
 
     if has_selected_color_media
       assign initial_visible_media_count = 0
-      assign first_visible_media_index = -1
-
       for media in media_items
-        capture media_color_keys
-          render 'product-media-color-keys', product: product, media: media, aliases: aliases
+        capture media_color
+          render 'product-media-color-segment', media: media
         endcapture
-        assign media_color_keys = media_color_keys | strip
-        assign media_is_visible = true
-
-        if media_color_keys != blank
-          assign padded_media_colors = ',' | append: media_color_keys | append: ','
-          unless padded_media_colors contains selected_color_token
-            assign media_is_visible = false
-          endunless
-        endif
-
-        if media_is_visible
-          if first_visible_media_index == -1
-            assign first_visible_media_index = forloop.index0
-          endif
+        assign media_color = media_color | strip
+        if media_color == 'all' or media_color == selected_color_key
           assign initial_visible_media_count = initial_visible_media_count | plus: 1
         endif
       endfor
     endif
   endif
+
+  assign has_color_option = false
+  if color_option_position > 0
+    assign has_color_option = true
+  endif
 -%}
 
-{{- has_selected_color_media -}}|{{- initial_visible_media_count -}}|{{- first_visible_media_index -}}
+{{- has_color_option -}}|{{- selected_color_key -}}|{{- has_selected_color_media -}}|{{- initial_visible_media_count -}}

@@ -17,9 +17,9 @@
   @param {string} [class] - Additional classes to apply to the controls
   @param {boolean} [secondary] - Whether the controls are secondary
   @param {object} [product] - Product whose Color option filters gallery media
-  @param {string} [media_color_aliases] - Optional color filename aliases
-  @param {string} [selected_color_key] - Normalized initial selected Color option value
-  @param {boolean} [has_selected_color_media] - Whether the initial color has matching media
+  @param {string} [selected_color_key] - Handleized initial selected Color option value
+  @param {string} [has_selected_color_media] - "true" when the initial color has matching media
+  @param {string} [has_color_option] - "true" when the product has a Color or Colour option
 
   @example
   {%- render 'slideshow-controls', style: 'dots', item_count: 10 -%}
@@ -114,40 +114,38 @@
             {% assign visible_item_index = 0 %}
             {% assign first_visible_thumbnail = true %}
             {% for media in thumbnails %}
-              {% assign control_media_colors = '' %}
-              {% assign control_media_hidden = false %}
+              {% assign control_media_color = 'all' %}
+              {% assign control_media_hidden_attribute = '' %}
               {% if product != blank %}
-                {% capture control_media_colors %}
-                  {% render 'product-media-color-keys',
-                    product: product,
-                    media: media,
-                    aliases: media_color_aliases
+                {% capture control_media_color %}
+                  {% render 'product-media-color-segment', media: media %}
+                {% endcapture %}
+                {% assign control_media_color = control_media_color | strip %}
+                {% capture control_media_hidden_attribute %}
+                  {% render 'product-media-color-hidden-attribute',
+                    media_color: control_media_color,
+                    has_color_option: has_color_option,
+                    selected_color_key: selected_color_key,
+                    has_selected_color_media: has_selected_color_media
                   %}
                 {% endcapture %}
-                {% assign control_media_colors = control_media_colors | strip %}
-                {% if selected_color_key != blank and has_selected_color_media and control_media_colors != blank %}
-                  {% assign padded_media_colors = ',' | append: control_media_colors | append: ',' %}
-                  {% assign selected_color_token = ',' | append: selected_color_key | append: ',' %}
-                  {% unless padded_media_colors contains selected_color_token %}
-                    {% assign control_media_hidden = true %}
-                  {% endunless %}
-                {% endif %}
+                {% assign control_media_hidden_attribute = control_media_hidden_attribute | strip %}
               {% endif %}
               {% assign visible_label_index = visible_item_index | plus: 1 %}
               {% assign control_label_length = visible_item_count | default: item_count %}
               <button
                 class="slideshow-control button button-unstyled slideshow-controls__thumbnail"
                 aria-label="{% if product != blank %}{{ 'accessibility.slide_status' | t: index: visible_label_index, length: control_label_length }}{% else %}{{ 'accessibility.slide_status' | t: index: forloop.index, length: forloop.length }}{% endif %}"
-                on:click="/select/{% if control_media_hidden %}{{ forloop.index0 }}{% else %}{{ visible_item_index }}{% endif %}"
+                on:click="/select/{% if control_media_hidden_attribute != blank %}{{ forloop.index0 }}{% else %}{{ visible_item_index }}{% endif %}"
                 style="--aspect-ratio: {% if aspect_ratio == 'adapt' %}{{ media.preview_image.aspect_ratio | default: 1.0 }}{% else %}{{ aspect_ratio }}{% endif %};"
                 ref="thumbnails[]"
                 {% if product != blank %}
                   data-media-index="{{ forloop.index0 }}"
-                  data-media-colors="{{ control_media_colors | escape }}"
+                  data-media-color="{{ control_media_color | escape }}"
                   data-slide-label-template="{{ 'accessibility.slide_status' | t: index: '__INDEX__', length: '__LENGTH__' | escape }}"
-                  {% if control_media_hidden %}hidden{% endif %}
+                  {{ control_media_hidden_attribute }}
                 {% endif %}
-                {% if first_visible_thumbnail and control_media_hidden == false %}
+                {% if first_visible_thumbnail and control_media_hidden_attribute == blank %}
                   aria-selected="true"
                 {% endif %}
               >
@@ -183,10 +181,10 @@
                   </span>
                 {% endif %}
               </button>
-              {% unless control_media_hidden %}
+              {% if control_media_hidden_attribute == blank %}
                 {% assign visible_item_index = visible_item_index | plus: 1 %}
                 {% assign first_visible_thumbnail = false %}
-              {% endunless %}
+              {% endif %}
             {% endfor %}
           </div>
         </scroll-hint>
@@ -200,50 +198,48 @@
             {% assign visible_item_index = 0 %}
             {% assign first_visible_dot = true %}
             {% for media in thumbnails %}
-              {% capture control_media_colors %}
-                {% render 'product-media-color-keys',
-                  product: product,
-                  media: media,
-                  aliases: media_color_aliases
+              {% capture control_media_color %}
+                {% render 'product-media-color-segment', media: media %}
+              {% endcapture %}
+              {% assign control_media_color = control_media_color | strip %}
+              {% capture control_media_hidden_attribute %}
+                {% render 'product-media-color-hidden-attribute',
+                  media_color: control_media_color,
+                  has_color_option: has_color_option,
+                  selected_color_key: selected_color_key,
+                  has_selected_color_media: has_selected_color_media
                 %}
               {% endcapture %}
-              {% assign control_media_colors = control_media_colors | strip %}
-              {% assign control_media_hidden = false %}
-              {% if selected_color_key != blank and has_selected_color_media and control_media_colors != blank %}
-                {% assign padded_media_colors = ',' | append: control_media_colors | append: ',' %}
-                {% assign selected_color_token = ',' | append: selected_color_key | append: ',' %}
-                {% unless padded_media_colors contains selected_color_token %}
-                  {% assign control_media_hidden = true %}
-                {% endunless %}
-              {% endif %}
+              {% assign control_media_hidden_attribute = control_media_hidden_attribute | strip %}
               {% assign visible_label_index = visible_item_index | plus: 1 %}
               {% assign control_label_length = visible_item_count | default: item_count %}
               <li
                 data-media-index="{{ forloop.index0 }}"
-                data-media-colors="{{ control_media_colors | escape }}"
-                {% if control_media_hidden %}hidden{% endif %}
+                data-media-color="{{ control_media_color | escape }}"
+                {{ control_media_hidden_attribute }}
               >
                 <button
                   class="slideshow-control button button-unstyled"
                   style="animation-timeline: --slide-{{ forloop.index0 }}"
                   aria-label="{{ 'accessibility.slide_status' | t: index: visible_label_index, length: control_label_length }}"
                   data-media-index="{{ forloop.index0 }}"
-                  data-media-colors="{{ control_media_colors | escape }}"
+                  data-media-color="{{ control_media_color | escape }}"
+                  data-slide-number
                   data-slide-label-template="{{ 'accessibility.slide_status' | t: index: '__INDEX__', length: '__LENGTH__' | escape }}"
-                  on:click="/select/{% if control_media_hidden %}{{ forloop.index0 }}{% else %}{{ visible_item_index }}{% endif %}"
+                  on:click="/select/{% if control_media_hidden_attribute != blank %}{{ forloop.index0 }}{% else %}{{ visible_item_index }}{% endif %}"
                   ref="dots[]"
-                  {% if control_media_hidden %}hidden{% endif %}
-                  {% if first_visible_dot and control_media_hidden == false %}
+                  {{ control_media_hidden_attribute }}
+                  {% if first_visible_dot and control_media_hidden_attribute == blank %}
                     aria-selected="true"
                   {% endif %}
                 >
-                  {{ forloop.index }}
+                  {{ visible_label_index }}
                 </button>
               </li>
-              {% unless control_media_hidden %}
+              {% if control_media_hidden_attribute == blank %}
                 {% assign visible_item_index = visible_item_index | plus: 1 %}
                 {% assign first_visible_dot = false %}
-              {% endunless %}
+              {% endif %}
             {% endfor %}
           {% else %}
             {% for i in (1..item_count) %}

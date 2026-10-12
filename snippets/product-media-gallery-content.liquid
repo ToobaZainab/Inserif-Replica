@@ -26,7 +26,8 @@
 {%- endif -%}
 {%- liquid
   assign selected_product = closest.product
-  assign selected_variant_media = selected_product.selected_or_first_available_variant.featured_media
+  assign selected_variant = selected_product.selected_or_first_available_variant
+  assign selected_variant_media = selected_variant.featured_media
   assign first_3d_model = selected_product.media | where: 'media_type', 'model' | first
 
   if block_settings.hide_variants
@@ -109,10 +110,7 @@
 
   assign sorted_media = '' | split: ','
   if request.page_type == 'product'
-    assign product_page_media = selected_variant_media | default: selected_product.featured_media
-    if product_page_media
-      assign sorted_media = selected_product.media | where: 'id', product_page_media.id
-    endif
+    assign sorted_media = selected_product.media
   elsif selected_variant_media
     assign sorted_media = sorted_media | concat: selected_product.media | where: 'id', selected_variant_media.id
 
@@ -129,6 +127,19 @@
   else
     assign sorted_media = selected_product.media
   endif
+
+  capture color_filter_state
+    render 'product-media-color-filter-state',
+      product: selected_product,
+      media_items: sorted_media,
+      variant: selected_variant,
+      page_type: request.page_type
+  endcapture
+  assign color_filter_state = color_filter_state | strip | split: '|'
+  assign has_color_option = color_filter_state[0]
+  assign selected_color_key = color_filter_state[1]
+  assign has_selected_color_media = color_filter_state[2]
+  assign initial_visible_media_count = color_filter_state[3] | plus: 0
   assign has_image_drop = sorted_media | has: 'media_type', 'image'
 
   # Determine if we're in single column mode (carousel or grid with one column)
@@ -351,30 +362,43 @@
   </div>
 {% else %}
   <media-gallery
-    class="
-      spacing-style
-      sticky-content
-      {% if media_presentation == 'grid' %}
-        media-gallery--{{ block_settings.media_columns }}-column
-        {% if block_settings.media_columns == "two" and block_settings.large_first_image%}media-gallery--large-first-image{% endif %}
-      {% endif %}
-      media-gallery--{{ media_presentation }}
-      {% if block_settings.slideshow_mobile_controls_style == 'hint' %}
-        media-gallery--hint
-      {% endif %}
-      {% if block_settings.extend_media %}
-        media-gallery--extend
-      {% endif %}
-    "
+    class="{% render 'product-media-gallery-classes', media_presentation: media_presentation, block_settings: block_settings %}"
     style="{% render 'spacing-style', settings: block_settings %} --thumbnail-width: {{ block_settings.thumbnail_width }}px; --media-radius: {{ block_settings.media_radius }}px;{% if block_settings.icons_style contains 'large' %} --slideshow-icon-padding: 0px;{% endif %}--image-gap: {{ block_settings.image_gap }}px;{% unless block_settings.aspect_ratio == 'adapt' %} --gallery-aspect-ratio: {{ block_settings.aspect_ratio }};{% endunless %}"
     data-presentation="{{ media_presentation }}"
+    data-has-color-option="{{ has_color_option }}"
+    data-selected-color="{{ selected_color_key | escape }}"
     {{ block_shopify_attributes }}
   >
     {% capture slides %}
+      {% assign initial_slideshow_selection_set = false %}
       {% for media in sorted_media %}
+        {% capture media_color %}
+          {% render 'product-media-color-segment', media: media %}
+        {% endcapture %}
+        {% assign media_color = media_color | strip %}
+        {% capture media_hidden_attribute %}
+          {% render 'product-media-color-hidden-attribute',
+            media_color: media_color,
+            has_color_option: has_color_option,
+            selected_color_key: selected_color_key,
+            has_selected_color_media: has_selected_color_media
+          %}
+        {% endcapture %}
+        {% assign media_hidden_attribute = media_hidden_attribute | strip %}
+        {% assign media_is_hidden = false %}
+        {% unless media_hidden_attribute == blank %}
+          {% assign media_is_hidden = true %}
+        {% endunless %}
+        {% assign is_initial_main_media = false %}
+        {% assign media_aria_hidden = 'true' %}
+        {% if media_hidden_attribute == blank and initial_slideshow_selection_set == false %}
+          {% assign media_aria_hidden = 'false' %}
+          {% assign is_initial_main_media = true %}
+          {% assign initial_slideshow_selection_set = true %}
+        {% endif %}
         {% capture children %}
           {%- liquid
-              if needs_both_sizes and forloop.first
+              if needs_both_sizes and is_initial_main_media
                 assign media_sizes = sizes_single
               else
                 assign media_sizes = sizes
@@ -383,10 +407,10 @@
           {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
             <div
               class="product-media-constraint-wrapper">
-              {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: forloop.first -%}
+              {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: is_initial_main_media -%}
             </div>
           {% else %}
-            {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: forloop.first -%}
+            {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: is_initial_main_media -%}
           {% endif %}
         {% endcapture %}
         {% capture class %}
@@ -398,13 +422,17 @@
           {% endcapture %}
         {% endif %}
         {% if block_settings.zoom and media.media_type == 'model' %}
-          {%- capture attributes -%}"{% if settings.transition_to_main_product and forloop.first %} data-view-transition-type="product-image-transition"{% endif %}{% endcapture -%}
+          {%- capture attributes -%}"{% if settings.transition_to_main_product and is_initial_main_media %} data-view-transition-type="product-image-transition"{% endif %}{% endcapture -%}
         {% elsif block_settings.zoom %}
-          {%- capture attributes -%}on:click="#zoom-dialog-{{ block_id }}/open/{{ forloop.index0 }}"{% if settings.transition_to_main_product and forloop.first %} data-view-transition-type="product-image-transition"{% endif %}{% endcapture -%}
+          {%- capture attributes -%}on:click="#zoom-dialog-{{ block_id }}/open/{{ forloop.index0 }}"{% if settings.transition_to_main_product and is_initial_main_media %} data-view-transition-type="product-image-transition"{% endif %}{% endcapture -%}
         {% endif %}
 
         {% render 'slideshow-slide',
           index: forloop.index0,
+          media_index: forloop.index0,
+          media_color: media_color,
+          hidden: media_is_hidden,
+          aria_hidden: media_aria_hidden,
           children: children,
           class: class,
           style: style,
@@ -422,6 +450,10 @@
             style: slideshow_controls_style,
             item_count: sorted_media.size,
             thumbnails: sorted_media,
+            product: selected_product,
+            selected_color_key: selected_color_key,
+            has_selected_color_media: has_selected_color_media,
+            visible_item_count: initial_visible_media_count,
             controls_on_media: controls_on_media,
             pagination_position: pagination_position,
             aspect_ratio: block_settings.aspect_ratio,
@@ -435,6 +467,10 @@
             style: block_settings.slideshow_mobile_controls_style,
             item_count: sorted_media.size,
             thumbnails: sorted_media,
+            product: selected_product,
+            selected_color_key: selected_color_key,
+            has_selected_color_media: has_selected_color_media,
+            visible_item_count: initial_visible_media_count,
             controls_on_media: mobile_controls_on_media,
             pagination_position: 'center',
             aspect_ratio: block_settings.aspect_ratio,
@@ -466,12 +502,40 @@
         class="media-gallery__grid list-unstyled"
         data-testid="media-gallery-grid"
       >
+        {% assign initial_visible_grid_index = 0 %}
         {% for media in sorted_media %}
+          {% capture media_color %}
+            {% render 'product-media-color-segment', media: media %}
+          {% endcapture %}
+          {% assign media_color = media_color | strip %}
+          {% capture media_hidden_attribute %}
+            {% render 'product-media-color-hidden-attribute',
+              media_color: media_color,
+              has_color_option: has_color_option,
+              selected_color_key: selected_color_key,
+              has_selected_color_media: has_selected_color_media
+            %}
+          {% endcapture %}
+          {% assign media_hidden_attribute = media_hidden_attribute | strip %}
+          {% assign media_visible_label_index = initial_visible_grid_index | plus: 1 %}
+          {% assign is_initial_main_media = false %}
+          {% if media_hidden_attribute == blank and initial_visible_grid_index == 0 %}
+            {% assign is_initial_main_media = true %}
+          {% endif %}
           <li
             ref="media[]"
             class="{{ product_media_container_class }} product-media-container--{{ media.media_type }} {% unless block_settings.aspect_ratio == 'adapt' %}product-media-container--force-aspect{% endunless %}"
             style="{% if block_settings.aspect_ratio == 'adapt' %} --media-preview-ratio: {{ media.preview_image.aspect_ratio | default: 1.0 }};{% endif %} --media-radius: {{ block_settings.media_radius }}px;"
-            {% if settings.transition_to_main_product and forloop.first %}
+            data-media-index="{{ forloop.index0 }}"
+            data-media-color="{{ media_color | escape }}"
+            {{ media_hidden_attribute }}
+            {% if initial_visible_grid_index == 0 and media_hidden_attribute == blank %}
+              data-color-first-visible
+            {% endif %}
+            {% if initial_visible_media_count == 1 and media_hidden_attribute == blank %}
+              data-color-only-visible
+            {% endif %}
+            {% if settings.transition_to_main_product and is_initial_main_media %}
               data-view-transition-type="product-image-transition"
             {% endif %}
             {% if media.presentation.focal_point != blank %}
@@ -482,7 +546,10 @@
               <button
                 type="button"
                 class="button button-unstyled product-media-container__zoom-button"
-                aria-label="{{ 'actions.zoom_media' | t: index: forloop.index }}"
+                aria-label="{{ 'actions.zoom_media' | t: index: media_visible_label_index }}"
+                data-media-index="{{ forloop.index0 }}"
+                data-media-color="{{ media_color | escape }}"
+                data-slide-label-template="{{ 'actions.zoom_media' | t: index: '__INDEX__' | escape }}"
                 on:click="/zoom/{{ forloop.index0 }}"
                 {% if block_settings.zoom %}
                   on:pointerenter="/preloadImage/{{ forloop.index0 }}"
@@ -490,7 +557,7 @@
               ></button>
             {%- endif -%}
             {%- liquid
-              if needs_both_sizes and forloop.first
+              if needs_both_sizes and is_initial_main_media
                 assign media_sizes = sizes_single
               else
                 assign media_sizes = sizes
@@ -498,12 +565,15 @@
             -%}
             {% if block_settings.aspect_ratio != 'adapt' and block_settings.constrain_to_viewport %}
               <div class="product-media-constraint-wrapper">
-                {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: forloop.first -%}
+                {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: is_initial_main_media -%}
               </div>
             {% else %}
-              {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: forloop.first -%}
+              {%- render 'product-media', media: media, sizes: media_sizes, is_main_product_media: is_initial_main_media -%}
             {% endif %}
           </li>
+          {% if media_hidden_attribute == blank %}
+            {% assign initial_visible_grid_index = initial_visible_grid_index | plus: 1 %}
+          {% endif %}
         {% endfor %}
       </ul>
     {% endif %}
@@ -534,7 +604,21 @@
               ref="thumbnails"
             >
               {% if sorted_media.size > 1 %}
+                {% assign initial_visible_zoom_thumbnail_index = 0 %}
                 {%- for media in sorted_media -%}
+                  {% capture media_color %}
+                    {% render 'product-media-color-segment', media: media %}
+                  {% endcapture %}
+                  {% assign media_color = media_color | strip %}
+                  {% capture media_hidden_attribute %}
+                    {% render 'product-media-color-hidden-attribute',
+                      media_color: media_color,
+                      has_color_option: has_color_option,
+                      selected_color_key: selected_color_key,
+                      has_selected_color_media: has_selected_color_media
+                    %}
+                  {% endcapture %}
+                  {% assign media_hidden_attribute = media_hidden_attribute | strip %}
                   {% liquid
                     assign aspect_ratio = block_settings.aspect_ratio
                     if block_settings.aspect_ratio == 'adapt'
@@ -548,7 +632,10 @@
                     on:click="/handleThumbnailClick/{{ forloop.index0 }}"
                     on:pointerenter="/handleThumbnailPointerEnter/{{ forloop.index0 }}"
                     style="--aspect-ratio: {{ aspect_ratio }}; --gallery-aspect-ratio: {{ aspect_ratio }};"
-                    {% if forloop.first %}
+                    data-media-index="{{ forloop.index0 }}"
+                    data-media-color="{{ media_color | escape }}"
+                    {{ media_hidden_attribute }}
+                    {% if media_hidden_attribute == blank and initial_visible_zoom_thumbnail_index == 0 %}
                       aria-selected="true"
                     {% endif %}
                   >
@@ -570,6 +657,9 @@
                       | escape
                     }}
                   </button>
+                  {% if media_hidden_attribute == blank %}
+                    {% assign initial_visible_zoom_thumbnail_index = initial_visible_zoom_thumbnail_index | plus: 1 %}
+                  {% endif %}
                 {%- endfor -%}
               {% endif %}
             </scroll-hint>
@@ -578,11 +668,27 @@
             class="dialog-zoomed-gallery list-unstyled"
           >
             {%- for media in sorted_media -%}
+              {% capture media_color %}
+                {% render 'product-media-color-segment', media: media %}
+              {% endcapture %}
+              {% assign media_color = media_color | strip %}
+              {% capture media_hidden_attribute %}
+                {% render 'product-media-color-hidden-attribute',
+                  media_color: media_color,
+                  has_color_option: has_color_option,
+                  selected_color_key: selected_color_key,
+                  has_selected_color_media: has_selected_color_media
+                %}
+              {% endcapture %}
+              {% assign media_hidden_attribute = media_hidden_attribute | strip %}
               <li
                 id="product-{{ media.id}}-{{ forloop.index }}"
                 class="{{ product_media_container_class | remove: 'media-fit-cover' }} product-media-container--{{ media.media_type }}{% if media.media_type == 'image' %} product-media-container--zoomable{% endif %}"
                 style="{% if block_settings.aspect_ratio == 'adapt' %} --media-preview-ratio: {{ media.preview_image.aspect_ratio | default: 1.0 }};{% endif %}"
                 ref="media[]"
+                data-media-index="{{ forloop.index0 }}"
+                data-media-color="{{ media_color | escape }}"
+                {{ media_hidden_attribute }}
                 {% if media.media_type == 'image' %}
                   on:click="/close"
                 {% endif %}

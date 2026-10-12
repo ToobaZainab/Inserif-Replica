@@ -46,10 +46,8 @@ export class MediaGallery extends Component {
   #handleProductSelect = (event) => {
     if (!(event.target instanceof Element) || event.target.closest('product-card')) return;
 
-    const selectedColor = event.selectedOptions.find(
-      (option) => normalizeColor(option.name) === 'color'
-    )?.value;
-    this.dataset.selectedColor = normalizeColor(selectedColor ?? '');
+    const selectedColor = event.selectedOptions.find((option) => isColorOption(option.name))?.value;
+    this.dataset.selectedColor = handleizeColor(selectedColor ?? '');
     this.#applyColorFilter(this.dataset.selectedColor);
 
     event.promise
@@ -74,52 +72,63 @@ export class MediaGallery extends Component {
   };
 
   /**
-   * Applies the selected color to the existing media and control copies.
-   * @param {string | undefined} selectedColor - The normalized Color option value.
+   * Applies the selected color to each rendered copy of the product media.
+   * @param {string | undefined} selectedColor - The handleized Color option value.
    */
   #applyColorFilter(selectedColor) {
-    const colorKey = normalizeColor(selectedColor ?? '');
-    const slides = Array.from(this.querySelectorAll('slideshow-slide[data-media-index]'));
+    const hasColorOption = this.dataset.hasColorOption === 'true';
+    const colorKey = hasColorOption ? handleizeColor(selectedColor ?? '') : '';
+    const slides = Array.from(this.querySelectorAll('slideshow-slide[data-media-index][data-media-color]'));
     if (!slides.length) return;
 
-    const hasColorMatches = slides.some((slide) => mediaColors(slide).includes(colorKey));
-    const shouldFilter = colorKey !== '' && hasColorMatches;
+    const hasColorMatches =
+      colorKey !== '' && slides.some((slide) => mediaColor(slide) !== 'all' && mediaColor(slide) === colorKey);
+    const shouldFilter = hasColorOption && hasColorMatches;
     const visibleIndexes = new Map();
     let visibleIndex = 0;
 
     for (const slide of slides) {
-      const isVisible = !shouldFilter || mediaColors(slide).length === 0 || mediaColors(slide).includes(colorKey);
+      const isVisible = !shouldFilter || mediaColor(slide) === 'all' || mediaColor(slide) === colorKey;
       slide.hidden = !isVisible;
       slide.setAttribute('aria-hidden', String(!isVisible || visibleIndex > 0));
 
       if (isVisible) {
-        visibleIndexes.set(Number(slide.dataset.mediaIndex), visibleIndex);
+        const mediaIndex = Number(slide.dataset.mediaIndex);
+        if (Number.isInteger(mediaIndex)) visibleIndexes.set(mediaIndex, visibleIndex);
         visibleIndex += 1;
       }
     }
 
-    for (const element of this.querySelectorAll('[data-media-index][data-media-colors]')) {
+    for (const element of this.querySelectorAll('[data-media-index][data-media-color]')) {
       const mediaIndex = Number(element.dataset.mediaIndex);
-      const isVisible = visibleIndexes.has(mediaIndex);
+      const visibleMediaIndex = visibleIndexes.get(mediaIndex);
+      const isVisible = visibleMediaIndex !== undefined;
       element.hidden = !isVisible;
 
       if (element instanceof HTMLButtonElement) {
-        element.setAttribute('aria-selected', String(visibleIndexes.get(mediaIndex) === 0));
+        const isSelectionControl =
+          element.classList.contains('slideshow-control') ||
+          element.classList.contains('dialog-thumbnails-list__thumbnail');
+        if (isSelectionControl) {
+          element.setAttribute('aria-selected', String(visibleMediaIndex === 0));
+        }
         const clickAction = element.getAttribute('on:click') ?? '';
-        const visibleItemIndex = visibleIndexes.get(mediaIndex);
 
-        if (clickAction.includes('/select/') && visibleItemIndex !== undefined) {
-          element.setAttribute('on:click', `/select/${visibleItemIndex}`);
+        if (clickAction.includes('/select/') && visibleMediaIndex !== undefined) {
+          element.setAttribute('on:click', `/select/${visibleMediaIndex}`);
         }
 
         const labelTemplate = element.dataset.slideLabelTemplate;
-        if (labelTemplate && visibleItemIndex !== undefined) {
+        if (labelTemplate && visibleMediaIndex !== undefined) {
           element.setAttribute(
             'aria-label',
             labelTemplate
-              .replace('__INDEX__', String(visibleItemIndex + 1))
+              .replace('__INDEX__', String(visibleMediaIndex + 1))
               .replace('__LENGTH__', String(visibleIndexes.size))
           );
+        }
+        if (element.hasAttribute('data-slide-number') && visibleMediaIndex !== undefined) {
+          element.textContent = String(visibleMediaIndex + 1);
         }
       }
     }
@@ -226,16 +235,22 @@ export class MediaGallery extends Component {
   }
 }
 
-function normalizeColor(value) {
+function handleizeColor(value) {
   return value
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '');
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-function mediaColors(element) {
-  return (element.dataset.mediaColors ?? '').split(',').filter(Boolean);
+function isColorOption(name) {
+  const normalizedName = name.trim().toLowerCase();
+  return normalizedName === 'color' || normalizedName === 'colour';
+}
+
+function mediaColor(element) {
+  return element.dataset.mediaColor ?? 'all';
 }
 
 if (!customElements.get('media-gallery')) {

@@ -52,8 +52,6 @@
             "extend_media": false,
             "zoom": true,
             "video_loop": false,
-            "hide_variants": false,
-            "color_media_aliases": "Black: dusk",
             "padding-block-start": 0,
             "padding-block-end": 0,
             "padding-inline-start": 0,

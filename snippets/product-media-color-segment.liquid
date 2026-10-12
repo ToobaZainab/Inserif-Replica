@@ -1,0 +1,27 @@
+{% doc %}
+  Returns the second double-underscore filename segment for a product media preview image.
+  Media without a color segment, or with the shared "all" segment, returns "all".
+
+  @param {object} media - The product media item to inspect
+
+  @example
+  {% render 'product-media-color-segment', media: media %}
+{% enddoc %}
+
+{%- liquid
+  assign filename = media.preview_image.src | split: '/' | last | split: '?' | first | downcase
+  assign filename_parts = filename | split: '.'
+  assign filename_extension_index = filename_parts.size | minus: 1
+  assign filename_without_extension = filename_parts | slice: 0, filename_extension_index | join: '.'
+  assign filename_segments = filename_without_extension | split: '__'
+  assign media_color = 'all'
+
+  if filename_segments.size > 1
+    assign media_color = filename_segments[1] | downcase
+    if media_color == blank
+      assign media_color = 'all'
+    endif
+  endif
+-%}
+
+{{- media_color -}}

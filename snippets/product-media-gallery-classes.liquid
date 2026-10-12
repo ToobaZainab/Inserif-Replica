@@ -1,0 +1,25 @@
+{% doc %}
+  Returns the responsive presentation classes for a product media gallery.
+
+  @param {string} media_presentation - The gallery presentation, either grid or carousel
+  @param {object} block_settings - The product media block settings
+
+  @example
+  {% render 'product-media-gallery-classes', media_presentation: 'grid', block_settings: block.settings %}
+{% enddoc %}
+
+spacing-style
+sticky-content
+{% if media_presentation == 'grid' %}
+  media-gallery--{{ block_settings.media_columns }}-column
+  {% if block_settings.media_columns == 'two' and block_settings.large_first_image %}
+    media-gallery--large-first-image
+  {% endif %}
+{% endif %}
+media-gallery--{{ media_presentation }}
+{% if block_settings.slideshow_mobile_controls_style == 'hint' %}
+  media-gallery--hint
+{% endif %}
+{% if block_settings.extend_media %}
+  media-gallery--extend
+{% endif %}

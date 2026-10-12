@@ -1,0 +1,34 @@
+{%- doc -%}
+  Returns filename color keys and a hidden attribute for one gallery media item.
+
+  @param {object} product - The product whose Color option values are recognized
+  @param {object} media - The media item to classify
+  @param {string} aliases - Optional newline-separated color aliases
+  @param {string} selected_color_key - Normalized selected Color option value
+  @param {boolean} has_selected_color_media - Whether that color has matching media
+
+  @example
+  {% render 'product-media-color-filter-item',
+    product: product,
+    media: media,
+    aliases: block.settings.color_media_aliases,
+    selected_color_key: 'black',
+    has_selected_color_media: true
+  %}
+{%- enddoc -%}
+
+{%- capture media_color_keys -%}
+  {%- render 'product-media-color-keys', product: product, media: media, aliases: aliases -%}
+{%- endcapture -%}
+{%- assign media_color_keys = media_color_keys | strip -%}
+{%- assign hidden_attribute = '' -%}
+
+{%- if selected_color_key != blank and has_selected_color_media and media_color_keys != blank -%}
+  {%- assign padded_media_colors = ',' | append: media_color_keys | append: ',' -%}
+  {%- assign selected_color_token = ',' | append: selected_color_key | append: ',' -%}
+  {%- unless padded_media_colors contains selected_color_token -%}
+    {%- assign hidden_attribute = 'hidden' -%}
+  {%- endunless -%}
+{%- endif -%}
+
+{{- media_color_keys -}}|{{- hidden_attribute -}}

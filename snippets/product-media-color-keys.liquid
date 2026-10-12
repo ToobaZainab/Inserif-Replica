@@ -1,0 +1,78 @@
+{%- doc -%}
+  Returns the comma-separated Color option values found as whole filename tokens for a media item.
+
+  @param {object} product - The product whose Color option values are recognized
+  @param {object} media - The product media item to inspect
+  @param {string} aliases - Optional newline-separated color aliases
+
+  @example
+  {% render 'product-media-color-keys', product: product, media: media, aliases: block.settings.color_media_aliases %}
+{%- enddoc -%}
+
+{%- liquid
+  assign media_source = media.src | default: media.preview_image.src
+  assign filename = media_source | split: '/' | last | split: '?' | first | downcase
+  assign filename_parts = filename | split: '.'
+  assign filename_tokens = '|'
+
+  for filename_part in filename_parts
+    unless forloop.last
+      assign separator_tokens = filename_part | replace: '_', '-' | split: '-'
+
+      for token in separator_tokens
+        assign normalized_token = token | handleize | remove: '-'
+        if normalized_token != blank
+          assign filename_tokens = filename_tokens | append: normalized_token | append: '|'
+        endif
+      endfor
+    endunless
+  endfor
+
+  assign media_color_keys = ''
+  assign alias_lines = aliases | newline_to_br | split: '<br />'
+-%}
+
+{%- for product_option in product.options_with_values -%}
+  {%- assign normalized_option_name = product_option.name | downcase | handleize | remove: '-' -%}
+  {%- if normalized_option_name == 'color' -%}
+    {%- for option_value in product_option.values -%}
+      {%- assign color_key = option_value.name | downcase | handleize | remove: '-' -%}
+      {%- assign color_token = '|' | append: color_key | append: '|' -%}
+      {%- assign media_matches_color = false -%}
+
+      {%- if color_key != blank and filename_tokens contains color_token -%}
+        {%- assign media_matches_color = true -%}
+      {%- endif -%}
+
+      {%- unless media_matches_color -%}
+        {%- for alias_line in alias_lines -%}
+          {%- assign alias_parts = alias_line | strip | split: ':' -%}
+          {%- assign alias_color_key = alias_parts | first | downcase | handleize | remove: '-' -%}
+          {%- if alias_color_key == color_key and alias_parts.size > 1 -%}
+            {%- assign color_aliases = alias_parts[1] | split: ',' -%}
+            {%- for color_alias in color_aliases -%}
+              {%- assign alias_token = color_alias | downcase | handleize | remove: '-' -%}
+              {%- assign alias_token = '|' | append: alias_token | append: '|' -%}
+              {%- if alias_token != '||' and filename_tokens contains alias_token -%}
+                {%- assign media_matches_color = true -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+          {%- if media_matches_color -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endunless -%}
+
+      {%- if media_matches_color -%}
+        {%- if media_color_keys != blank -%}
+          {%- assign media_color_keys = media_color_keys | append: ',' -%}
+        {%- endif -%}
+        {%- assign media_color_keys = media_color_keys | append: color_key -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{{- media_color_keys -}}

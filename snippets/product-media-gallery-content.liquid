@@ -129,11 +129,7 @@
   endif
 
   capture color_filter_state
-    render 'product-media-color-filter-state',
-      product: selected_product,
-      media_items: sorted_media,
-      variant: selected_variant,
-      page_type: request.page_type
+    render 'product-media-color-filter-state', product: selected_product, media_items: sorted_media, variant: selected_variant, page_type: request.page_type
   endcapture
   assign color_filter_state = color_filter_state | strip | split: '|'
   assign has_color_option = color_filter_state[0]

@@ -229,6 +229,8 @@
     "limit_content_width": "콘텐츠 너비 제한",
     "color_scheme": "색상 구성표",
     "product_count": "제품 수",
+    "color_card_title_format": "색상 카드 제목 형식",
+    "show_each_color_as_own_card": "각 색상을 별도의 카드로 표시",
     "product_type": "제품 유형",
     "content_width": "콘텐츠 너비",
     "collection": "컬렉션",
@@ -587,6 +589,8 @@
     "title_preset": "제목 사전 설정"
   },
   "options": {
+    "color_card_label_below_title": "제목 아래 색상 레이블",
+    "color_card_title_suffix": "제품 제목 - 색상",
     "apple": "Apple",
     "arrow": "화살표",
     "banana": "바나나",

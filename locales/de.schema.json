@@ -229,6 +229,8 @@
     "limit_content_width": "Inhaltsbreite begrenzen",
     "color_scheme": "Farbschema",
     "product_count": "Produktanzahl",
+    "color_card_title_format": "Format des Farbkartentitels",
+    "show_each_color_as_own_card": "Jede Farbe als eigene Karte anzeigen",
     "product_type": "Produkttyp",
     "content_width": "Inhaltsbreite",
     "collection": "Kollektion",
@@ -587,6 +589,8 @@
     "title_preset": "Titelvoreinstellung"
   },
   "options": {
+    "color_card_label_below_title": "Farbangabe unter dem Titel",
+    "color_card_title_suffix": "Produkttitel – Farbe",
     "apple": "Apfel",
     "arrow": "Pfeil",
     "banana": "Banane",

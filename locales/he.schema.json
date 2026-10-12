@@ -407,6 +407,8 @@
     "comparison_slider": "מחוון השוואה"
   },
   "options": {
+    "color_card_label_below_title": "תווית צבע מתחת לכותרת",
+    "color_card_title_suffix": "שם המוצר - צבע",
     "above_carousel": "מעל הקרוסלה",
     "accent": "הדגשה",
     "all": "הכול",
@@ -945,6 +947,8 @@
     "product_card_carousel": "הצגת קרוסלה",
     "product_cards": "כרטיסי מוצר",
     "product_count": "כמות מוצרים",
+    "color_card_title_format": "תבנית כותרת כרטיס צבע",
+    "show_each_color_as_own_card": "הצגת כל צבע ככרטיס נפרד",
     "product_pages": "דפי מוצר",
     "product_templates": "תבניות מוצר",
     "product_title_case": "אותיות רישיות/קטנות בכותרת המוצר",

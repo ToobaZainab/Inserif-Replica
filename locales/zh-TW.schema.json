@@ -229,6 +229,8 @@
     "limit_content_width": "限制內容寬度",
     "color_scheme": "顏色配置",
     "product_count": "產品數",
+    "color_card_title_format": "顏色卡片標題格式",
+    "show_each_color_as_own_card": "將每種顏色顯示為個別卡片",
     "product_type": "產品類型",
     "content_width": "內容寬度",
     "collection": "商品系列",
@@ -587,6 +589,8 @@
     "title_preset": "標題預設設定"
   },
   "options": {
+    "color_card_label_below_title": "標題下方的顏色標籤",
+    "color_card_title_suffix": "商品標題 - 顏色",
     "apple": "Apple",
     "arrow": "箭頭",
     "auto": "自動",

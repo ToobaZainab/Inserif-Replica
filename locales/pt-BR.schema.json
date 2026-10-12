@@ -229,6 +229,8 @@
     "limit_content_width": "Limitar largura do conteúdo",
     "color_scheme": "Esquema de cores",
     "product_count": "Contagem de produtos",
+    "color_card_title_format": "Formato do título do cartão de cor",
+    "show_each_color_as_own_card": "Mostrar cada cor como um cartão próprio",
     "product_type": "Tipo de produto",
     "content_width": "Largura do conteúdo",
     "collection": "Coleção",
@@ -587,6 +589,8 @@
     "title_preset": "Predefinição de título"
   },
   "options": {
+    "color_card_label_below_title": "Etiqueta da cor abaixo do título",
+    "color_card_title_suffix": "Título do produto - cor",
     "apple": "Apple",
     "arrow": "Seta",
     "auto": "Automático",

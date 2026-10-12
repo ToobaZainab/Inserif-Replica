@@ -229,6 +229,8 @@
     "limit_content_width": "コンテンツの幅を制限する",
     "color_scheme": "配色",
     "product_count": "商品数",
+    "color_card_title_format": "カラー別カードのタイトル形式",
+    "show_each_color_as_own_card": "各色を個別の商品カードとして表示",
     "product_type": "商品タイプ",
     "content_width": "コンテンツの幅",
     "collection": "コレクション",
@@ -587,6 +589,8 @@
     "title_preset": "タイトルプリセット"
   },
   "options": {
+    "color_card_label_below_title": "タイトルの下に色ラベル",
+    "color_card_title_suffix": "商品名 - 色",
     "apple": "Apple",
     "arrow": "矢印",
     "auto": "自動",

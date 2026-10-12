@@ -229,6 +229,8 @@
     "limit_content_width": "Begränsa innehållsbredd",
     "color_scheme": "Färgschema",
     "product_count": "Produktantal",
+    "color_card_title_format": "Titelformat för färgkort",
+    "show_each_color_as_own_card": "Visa varje färg som ett eget kort",
     "product_type": "Produkttyp",
     "content_width": "Innehållsbredd",
     "collection": "Produktserie",
@@ -587,6 +589,8 @@
     "title_preset": "Förinställning för rubrik"
   },
   "options": {
+    "color_card_label_below_title": "Färgetikett under titeln",
+    "color_card_title_suffix": "Produkttitel – färg",
     "apple": "Apple",
     "arrow": "Pil",
     "auto": "Auto",

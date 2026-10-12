@@ -229,6 +229,8 @@
     "limit_content_width": "Omezit šířku obsahu",
     "color_scheme": "Barevné schéma",
     "product_count": "Počet produktů",
+    "color_card_title_format": "Formát názvu barevné karty",
+    "show_each_color_as_own_card": "Zobrazit každou barvu jako vlastní kartu",
     "product_type": "Typ produktu",
     "content_width": "Šířka obsahu",
     "collection": "Kolekce",
@@ -587,6 +589,8 @@
     "title_preset": "Předvolba nadpisu"
   },
   "options": {
+    "color_card_label_below_title": "Označení barvy pod názvem",
+    "color_card_title_suffix": "Název produktu – barva",
     "apple": "Apple",
     "arrow": "Šipka",
     "auto": "Automaticky",

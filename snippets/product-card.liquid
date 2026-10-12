@@ -8,6 +8,10 @@
   @param {object} [block] - The block object
   @param {number} [product_card_gap] - The gap between the product card children (overrides block settings)
   @param {string} [product_view_context] - The context in which the product card is being rendered. Used for standard events.
+  @param {object} [color_card_variant] - The representative variant for a color-specific card
+  @param {string} [color_card_value] - The color option value represented by this card
+  @param {boolean} [color_card_available] - Whether any variant of this color is available
+  @param {string} [product_card_id_prefix] - Prefix to keep standalone card link IDs unique
 {%- enddoc -%}
 
 {% assign block_settings = block.settings %}
@@ -23,7 +27,11 @@
 
 {% liquid
   assign has_quick_add = false
-  if settings.quick_add and product.available
+  if color_card_variant != blank
+    if settings.quick_add and color_card_available
+      assign has_quick_add = true
+    endif
+  elsif settings.quick_add and product.available
     assign has_quick_add = true
   endif
 
@@ -32,11 +40,19 @@
     assign has_mobile_quick_add = true
   endif
 
-  assign product_card_id = 'product-card-link-' | append: block.id | append: '-' | append: product.id
+  assign product_card_id_prefix = product_card_id_prefix | default: block.id
+  assign product_card_id = 'product-card-link-' | append: product_card_id_prefix | append: '-' | append: product.id
+  if color_card_variant != blank
+    assign product_card_id = product_card_id | append: '-' | append: color_card_variant.id
+  endif
   assign product_card_gap_value = product_card_gap | default: block_settings.product_card_gap
 
   # variant_to_link drives the featured image used by the main-product view transition.
-  assign variant_to_link = product.selected_or_first_available_variant
+  assign variant_to_link = color_card_variant | default: product.selected_or_first_available_variant
+  assign product_card_url = product.url
+  if color_card_variant != blank
+    assign product_card_url = color_card_variant.url
+  endif
 
   if settings.transition_to_main_product
     assign featured_image = variant_to_link.featured_image
@@ -63,7 +79,7 @@
   class="product-card size-style"
   style="{% render 'size-style', settings: block_settings %}"
   data-product-id="{{ product.id }}"
-  id="product-card-{{ block.id }}"
+  id="product-card-{{ product_card_id_prefix }}{% if product_card_id_prefix == blank %}{{ block.id }}{% endif %}{% if color_card_variant != blank %}-{{ product.id }}-{{ color_card_variant.id }}{% endif %}"
   {% if settings.transition_to_main_product %}
     data-product-transition="true"
     data-featured-media-url="{{ featured_media_url }}"
@@ -81,11 +97,11 @@
     id="{{ product_card_id | md5 }}"
     {% unless onboarding %}
       {% # Link to product.url so algorithmic variant relevance and tracking params are maintained. %}
-      href="{{ product.url }}"
+      href="{{ product_card_url }}"
     {% endunless %}
     class="product-card__link"
     ref="productCardLink"
-    aria-label="{{ product.title | escape }}"
+    aria-label="{{ product.title | escape }}{% if color_card_value != blank %} - {{ color_card_value | escape }}{% endif %}"
   ></a>
   <div
     class="

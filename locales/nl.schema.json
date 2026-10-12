@@ -229,6 +229,8 @@
     "limit_content_width": "Breedte van content beperken",
     "color_scheme": "Kleurenschema",
     "product_count": "Aantal producten",
+    "color_card_title_format": "Titelindeling kleurkaart",
+    "show_each_color_as_own_card": "Elke kleur als aparte kaart weergeven",
     "product_type": "Producttype",
     "content_width": "Breedte content",
     "collection": "Collectie",
@@ -587,6 +589,8 @@
     "title_preset": "Titelvoorinstelling"
   },
   "options": {
+    "color_card_label_below_title": "Kleurlabel onder de titel",
+    "color_card_title_suffix": "Producttitel - kleur",
     "apple": "Apple",
     "arrow": "Pijl",
     "banana": "Banaan",

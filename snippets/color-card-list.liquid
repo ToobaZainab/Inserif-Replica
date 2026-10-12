@@ -1,0 +1,119 @@
+{% doc %}
+  Returns ordered color-card records for a product.
+  Each record is color-value-index, variant-index, and color availability, separated by commas;
+  records are separated by semicolons. Returns "single" when color expansion is not applicable
+  and "none" when an active Color filter excludes every Color option value.
+
+  @param {object} product - The product whose Color or Colour variants are grouped
+  @param {object[]} [filters] - Active storefront filters used to restrict matching colors
+
+  @example
+  {% render 'color-card-list', product: product, filters: collection.filters %}
+{% enddoc %}
+
+{%- liquid
+  assign color_option = nil
+  assign color_option_position = 0
+
+  for product_option in product.options_with_values
+    assign option_name = product_option.name | downcase | strip
+    if option_name == 'color' or option_name == 'colour'
+      assign color_option = product_option
+      assign color_option_position = product_option.position
+      break
+    endif
+  endfor
+
+  assign active_color_handles = '|'
+  assign has_active_color_filter = false
+  for filter in filters
+    assign filter_label = filter.label | downcase | strip
+    assign filter_param_name = filter.param_name | downcase
+    if filter_label == 'color' or filter_label == 'colour' or filter_param_name contains '.option.color' or filter_param_name contains '.option.colour'
+      for active_value in filter.active_values
+        assign has_active_color_filter = true
+        assign active_color_handle = active_value.value | handleize
+        assign active_color_handles = active_color_handles | append: active_color_handle | append: '|'
+      endfor
+    endif
+  endfor
+
+  if color_option_position == 0
+    echo 'single'
+  elsif product.variants_count == 1
+    if has_active_color_filter
+      assign only_variant_color_index = color_option_position | minus: 1
+      assign only_variant = product.variants.first
+      assign only_variant_color = only_variant.options[only_variant_color_index] | handleize
+      assign only_variant_color_token = '|' | append: only_variant_color | append: '|'
+      if active_color_handles contains only_variant_color_token
+        echo 'single'
+      else
+        echo 'none'
+      endif
+    else
+      echo 'single'
+    endif
+  else
+    capture color_card_records
+      assign variant_color_index = color_option_position | minus: 1
+      for color_value in color_option.values
+        assign color_value_index = forloop.index0
+        assign color_value_handle = color_value.name | handleize
+        assign color_value_token = '|' | append: color_value_handle | append: '|'
+        assign include_color = true
+
+        if has_active_color_filter
+          unless active_color_handles contains color_value_token
+            assign include_color = false
+          endunless
+        endif
+
+        if include_color
+          assign has_first_variant = false
+          assign has_available_variant = false
+          assign first_variant_index = 0
+          assign available_variant_index = 0
+
+          for variant in product.variants
+            if variant.options[variant_color_index] == color_value.name
+              unless has_first_variant
+                assign first_variant_index = forloop.index0
+                assign has_first_variant = true
+              endunless
+
+              if variant.available and has_available_variant == false
+                assign available_variant_index = forloop.index0
+                assign has_available_variant = true
+                break
+              endif
+            endif
+          endfor
+
+          if has_first_variant
+            assign chosen_variant_index = first_variant_index
+            assign color_available = 0
+            if has_available_variant
+              assign chosen_variant_index = available_variant_index
+              assign color_available = 1
+            endif
+            echo color_value_index
+            echo ','
+            echo chosen_variant_index
+            echo ','
+            echo color_available
+            echo ';'
+          endif
+        endif
+      endfor
+    endcapture
+
+    assign color_card_records = color_card_records | strip
+    if color_card_records == blank
+      echo 'none'
+    else
+      echo 'colors|'
+      echo color_card_records
+    endif
+  endif
+-%}

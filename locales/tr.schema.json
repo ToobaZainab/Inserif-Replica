@@ -229,6 +229,8 @@
     "limit_content_width": "İçerik genişliğini sınırla",
     "color_scheme": "Renk şeması",
     "product_count": "Ürün sayısı",
+    "color_card_title_format": "Renk kartı başlık biçimi",
+    "show_each_color_as_own_card": "Her rengi ayrı bir kart olarak göster",
     "product_type": "Ürün türü",
     "content_width": "İçerik genişliği",
     "collection": "Koleksiyon",
@@ -587,6 +589,8 @@
     "title_preset": "Başlık ön ayarı"
   },
   "options": {
+    "color_card_label_below_title": "Başlığın altında renk etiketi",
+    "color_card_title_suffix": "Ürün başlığı - renk",
     "apple": "Apple",
     "arrow": "Ok",
     "banana": "Muz",

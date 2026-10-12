@@ -229,6 +229,8 @@
     "limit_content_width": "Limita larghezza contenuto",
     "color_scheme": "Schema di colori",
     "product_count": "Conteggio prodotti",
+    "color_card_title_format": "Formato titolo scheda colore",
+    "show_each_color_as_own_card": "Mostra ogni colore come scheda separata",
     "product_type": "Tipo di prodotto",
     "content_width": "Larghezza contenuto",
     "collection": "Collezione",
@@ -587,6 +589,8 @@
     "title_preset": "Preimpostazione titolo"
   },
   "options": {
+    "color_card_label_below_title": "Etichetta colore sotto il titolo",
+    "color_card_title_suffix": "Titolo prodotto - colore",
     "apple": "Mela",
     "arrow": "Freccia",
     "auto": "Automatico",

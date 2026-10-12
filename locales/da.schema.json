@@ -229,6 +229,8 @@
     "limit_content_width": "Begræns bredde på indhold",
     "color_scheme": "Farveskema",
     "product_count": "Antal produkter",
+    "color_card_title_format": "Format for farvekortets titel",
+    "show_each_color_as_own_card": "Vis hver farve som sit eget kort",
     "product_type": "Produkttype",
     "content_width": "Bredde på indhold",
     "collection": "Kollektion",
@@ -587,6 +589,8 @@
     "title_preset": "Forudindstilling for titel"
   },
   "options": {
+    "color_card_label_below_title": "Farveetiket under titel",
+    "color_card_title_suffix": "Produkttitel – farve",
     "apple": "Apple",
     "arrow": "Pil",
     "auto": "Auto",

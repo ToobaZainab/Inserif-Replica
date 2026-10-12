@@ -473,6 +473,8 @@
     "clipboard": "Clipboard",
     "collection_images": "Collection images",
     "color": "Color",
+    "color_card_label_below_title": "Color label below title",
+    "color_card_title_suffix": "Product title - color",
     "compact": "Compact",
     "complementary": "Complementary",
     // CSS object-fit property: scale media to fit container
@@ -1022,6 +1024,8 @@
     "product_card_carousel": "Show carousel",
     "product_cards": "Product cards",
     "product_count": "Product count",
+    "color_card_title_format": "Color card title format",
+    "show_each_color_as_own_card": "Show each color as its own card",
     "product_pages": "Product pages",
     "product_templates": "Product templates",
     // Setting label for text capitalization of product titles

@@ -4,14 +4,18 @@
   @param {object} product - The product object
   @param {string} section_id - The section ID
   @param {object} [block] - The block object
+  @param {object} [color_card_variant] - The representative variant for a color-specific card
 {%- enddoc -%}
 
 {% liquid
-  assign product_form_id = 'QuickAdd-ProductForm-' | append: product.id | append: '-' | append: block.id
+  assign product_form_id = 'QuickAdd-ProductForm-' | append: product.id | append: '-' | append: section_id | append: '-' | append: block.id
+  if color_card_variant != blank
+    assign product_form_id = product_form_id | append: '-' | append: color_card_variant.id
+  endif
   assign add_to_cart_text = 'actions.add' | t
   assign choose_options_text = 'actions.choose' | t
   # Logic to determine which variant to use (matching swatch selection logic from product-card)
-  assign variant = product.selected_or_first_available_variant
+  assign variant = color_card_variant | default: product.selected_or_first_available_variant
 
   assign uses_selling_plans = false
   if product.requires_selling_plan or product.selling_plan_groups.size > 0
@@ -33,6 +37,9 @@
   assign render_choose = false
 
   if product.variants_count == 1
+    assign initial_button = 'add'
+    assign render_add = true
+  elsif color_card_variant != blank
     assign initial_button = 'add'
     assign render_add = true
   elsif product.options.size == 1

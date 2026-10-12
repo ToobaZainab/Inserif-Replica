@@ -407,6 +407,8 @@
     "comparison_slider": "موازنہ کرنے والا سلائیڈر"
   },
   "options": {
+    "color_card_label_below_title": "عنوان کے نیچے رنگ کا لیبل",
+    "color_card_title_suffix": "پروڈکٹ کا عنوان - رنگ",
     "above_carousel": "کیرول کے اوپر",
     "accent": "ایکسنٹ",
     "all": "سبھی",
@@ -945,6 +947,8 @@
     "product_card_carousel": "کیراؤسل دکھائیں",
     "product_cards": "پروڈکٹ کے کارڈ",
     "product_count": "پروڈکٹ کی گنتی",
+    "color_card_title_format": "رنگ کارڈ کے عنوان کا فارمیٹ",
+    "show_each_color_as_own_card": "ہر رنگ کو الگ کارڈ کے طور پر دکھائیں",
     "product_pages": "پروڈکٹ کے صفحات",
     "product_templates": "پروڈکٹ کا ٹیمپلیٹ",
     "product_title_case": "پروڈکٹ کے ٹائٹل کا کیس",

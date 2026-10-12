@@ -5,6 +5,7 @@
   @param {product} product_resource - The product to render
   @param {boolean} [show_unit_price] - Whether to show the unit price
   @param {boolean} [show_sale_price_first] - Whether to show the sale price first
+  @param {object} [color_card_variant] - The representative variant for a color-specific card
 {%- enddoc -%}
 
 {% render 'price-styles' %}
@@ -12,7 +13,7 @@
 {%- liquid
   assign show_unit_price = show_unit_price | default: false
   assign show_sale_price_first = show_sale_price_first | default: false
-  assign selected_variant = product_resource.selected_or_first_available_variant
+  assign selected_variant = color_card_variant | default: product_resource.selected_or_first_available_variant
   assign price = selected_variant.price
   assign compare_at_price = selected_variant.compare_at_price
 
@@ -37,10 +38,12 @@
     assign is_product_card = true
   endif
 
-  if is_product_card
+  if is_product_card and color_card_variant == blank
     assign price_min = product_resource.price_min
     assign price_max = product_resource.price_max
     assign has_volume_pricing = product_resource.quantity_price_breaks_configured? | default: false
+  elsif color_card_variant != blank
+    assign has_volume_pricing = false
   else
     # Product page: only use selected variant's pricing
     if selected_variant.quantity_price_breaks.size > 0

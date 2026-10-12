@@ -229,6 +229,8 @@
     "limit_content_width": "Ogranicz szerokość treści",
     "color_scheme": "Schemat kolorów",
     "product_count": "Liczba produktów",
+    "color_card_title_format": "Format tytułu karty koloru",
+    "show_each_color_as_own_card": "Pokaż każdy kolor jako osobną kartę",
     "product_type": "Typ produktu",
     "content_width": "Szerokość treści",
     "collection": "Kolekcja",
@@ -587,6 +589,8 @@
     "title_preset": "Gotowe ustawienie tytułu"
   },
   "options": {
+    "color_card_label_below_title": "Etykieta koloru pod tytułem",
+    "color_card_title_suffix": "Tytuł produktu – kolor",
     "apple": "Apple",
     "arrow": "Strzałka",
     "banana": "Banan",

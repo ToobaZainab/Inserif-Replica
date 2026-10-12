@@ -1,0 +1,119 @@
+{%- doc -%}
+  Renders a color-specific product card using the shared product-card and gallery snippets.
+
+  @param {object} product - The product to render
+  @param {object} color_card_variant - The first available variant for this color, or first matching variant when sold out
+  @param {string} color_card_value - The color option value represented by this card
+  @param {boolean} color_card_available - Whether any variant of this color is available
+  @param {object} section - The containing section
+  @param {string} section_id - The containing section ID
+  @param {string} [product_view_context] - Context value for standard view events
+{%- enddoc -%}
+
+{% liquid
+  assign card_available = color_card_available
+  assign card_compare_at_price = color_card_variant.compare_at_price
+  assign card_price = color_card_variant.price
+  assign card_on_sale = false
+  if card_compare_at_price > card_price
+    assign card_on_sale = true
+  endif
+%}
+
+{% capture gallery_children %}
+  {% if card_available == false or card_on_sale %}
+    <div
+      class="product-badges product-badges--{{ settings.badge_position }}"
+      style="
+        --badge-border-radius: {{ settings.badge_corner_radius }}px;
+        --badge-font-family: var(--font-{{ settings.badge_font_family }}--family);
+        --badge-font-weight: var(--font-{{ settings.badge_font_family }}--weight);
+        --badge-text-transform: {{ settings.badge_text_transform }};
+      "
+    >
+      <div class="product-badges__badge product-badges__badge--rectangle{% if card_available == false %} color-custom-badge-sold-out{% else %} color-custom-badge-sale{% endif %}">
+        {% if card_available == false %}
+          {{ 'content.product_badge_sold_out' | t }}
+        {% else %}
+          {{ 'content.product_badge_sale' | t }}
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if card_available and settings.quick_add or card_available and settings.mobile_quick_add %}
+    {% render 'quick-add',
+      product: product,
+      section_id: section_id,
+      color_card_variant: color_card_variant
+    %}
+  {% endif %}
+{% endcapture %}
+
+{% capture card_children %}
+  {% render 'card-gallery',
+    children: gallery_children,
+    color_card_product: product,
+    color_card_variant: color_card_variant,
+    color_card_value: color_card_value,
+    section: section
+  %}
+
+  <h3 class="product-grid-view-zoom-out--details">
+    {{ product.title | escape }}{% if settings.color_card_title_format == 'title_color_suffix' %} - {{ color_card_value | escape }}{% endif %}
+  </h3>
+
+  <div class="color-product-card__details">
+    <h3 class="color-product-card__heading">
+      <a
+        class="color-product-card__title"
+        href="{{ color_card_variant.url }}"
+        aria-label="{{ product.title | escape }} - {{ color_card_value | escape }}"
+      >
+        {{ product.title | escape }}{% if settings.color_card_title_format == 'title_color_suffix' %} - {{ color_card_value | escape }}{% endif %}
+      </a>
+    </h3>
+    {% if settings.color_card_title_format == 'color_label_below_title' %}
+      <span class="color-product-card__color-label">{{ color_card_value | escape }}</span>
+    {% endif %}
+    {% render 'price', product_resource: product, color_card_variant: color_card_variant %}
+  </div>
+{% endcapture %}
+
+{% render 'product-card',
+  children: card_children,
+  product: product,
+  product_view_context: product_view_context,
+  color_card_variant: color_card_variant,
+  color_card_value: color_card_value,
+  color_card_available: color_card_available,
+  product_card_gap: 16,
+  product_card_id_prefix: section.id
+%}
+
+{% render 'product-badges-styles' %}
+{% render 'product-card-gallery-zoom-details-styles' %}
+
+{% stylesheet %}
+  .color-product-card__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    min-width: 0;
+  }
+
+  .color-product-card__title {
+    color: inherit;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .color-product-card__heading {
+    margin: 0;
+    font: inherit;
+  }
+
+  .color-product-card__color-label {
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+  }
+{% endstylesheet %}

@@ -229,6 +229,8 @@
     "limit_content_width": "จำกัดความกว้างของเนื้อหา",
     "color_scheme": "ชุดสี",
     "product_count": "จำนวนสินค้า",
+    "color_card_title_format": "รูปแบบชื่อการ์ดสี",
+    "show_each_color_as_own_card": "แสดงแต่ละสีเป็นการ์ดแยกกัน",
     "product_type": "ประเภทสินค้า",
     "content_width": "ความกว้างของเนื้อหา",
     "collection": "คอลเลกชัน",
@@ -587,6 +589,8 @@
     "title_preset": "พรีเซ็ตชื่อ"
   },
   "options": {
+    "color_card_label_below_title": "ป้ายสีใต้ชื่อเรื่อง",
+    "color_card_title_suffix": "ชื่อสินค้า - สี",
     "apple": "Apple",
     "arrow": "ลูกศร",
     "auto": "อัตโนมัติ",

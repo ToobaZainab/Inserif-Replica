@@ -229,6 +229,8 @@
     "limit_content_width": "Begrens innholdsbredde",
     "color_scheme": "Fargeskjema",
     "product_count": "Antall produkter",
+    "color_card_title_format": "Tittelformat for fargekort",
+    "show_each_color_as_own_card": "Vis hver farge som eget kort",
     "product_type": "Produkttype",
     "content_width": "Innholdsbredde",
     "collection": "Samling",
@@ -587,6 +589,8 @@
     "title_preset": "Forhåndsinnstilling for tittel"
   },
   "options": {
+    "color_card_label_below_title": "Fargeetikett under tittelen",
+    "color_card_title_suffix": "Produkttittel – farge",
     "apple": "Eple",
     "arrow": "Pil",
     "auto": "Auto",

@@ -229,6 +229,8 @@
     "limit_content_width": "Rajoita sisällön leveyttä",
     "color_scheme": "Värimalli",
     "product_count": "Tuotteiden määrä",
+    "color_card_title_format": "Värikortin otsikkomuoto",
+    "show_each_color_as_own_card": "Näytä kukin väri omana korttinaan",
     "product_type": "Tuotetyyppi",
     "content_width": "Sisällön leveys",
     "collection": "Kokoelma",
@@ -587,6 +589,8 @@
     "title_preset": "Otsikon esiasetus"
   },
   "options": {
+    "color_card_label_below_title": "Väritunniste otsikon alla",
+    "color_card_title_suffix": "Tuotteen nimi – väri",
     "apple": "Omena",
     "arrow": "Nuoli",
     "auto": "Automaattinen",

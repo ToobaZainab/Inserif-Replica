@@ -1854,6 +1854,22 @@
         "default": true
       },
       {
+        "type": "select",
+        "id": "color_card_title_format",
+        "label": "t:settings.color_card_title_format",
+        "options": [
+          {
+            "value": "title_color_suffix",
+            "label": "t:options.color_card_title_suffix"
+          },
+          {
+            "value": "color_label_below_title",
+            "label": "t:options.color_card_label_below_title"
+          }
+        ],
+        "default": "title_color_suffix"
+      },
+      {
         "type": "checkbox",
         "id": "mobile_quick_add",
         "label": "t:settings.mobile_quick_add",

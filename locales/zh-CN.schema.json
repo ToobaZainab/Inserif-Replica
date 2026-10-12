@@ -229,6 +229,8 @@
     "limit_content_width": "限制内容宽度",
     "color_scheme": "配色方案",
     "product_count": "产品计数",
+    "color_card_title_format": "颜色卡片标题格式",
+    "show_each_color_as_own_card": "将每种颜色显示为单独的卡片",
     "product_type": "产品类型",
     "content_width": "内容宽度",
     "collection": "产品系列",
@@ -587,6 +589,8 @@
     "title_preset": "标题预设"
   },
   "options": {
+    "color_card_label_below_title": "标题下方的颜色标签",
+    "color_card_title_suffix": "产品标题 - 颜色",
     "apple": "Apple",
     "arrow": "箭头",
     "auto": "自动",

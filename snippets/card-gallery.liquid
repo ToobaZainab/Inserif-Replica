@@ -6,18 +6,60 @@
   @param [children] - Additional content rendered below the card gallery
   @param [section] - The section object the snippet is rendered in
   @param [block] - The block object the snippet is rendered in
+  @param {object} [color_card_variant] - The representative variant for a color-specific card
+  @param {string} [color_card_value] - The color option value represented by this card
+  @param {object} [color_card_product] - Explicit product for standalone color-card rendering
 {%- enddoc -%}
 
 {% liquid
-  assign product = closest.product
+  assign product = color_card_product | default: closest.product
   assign block_settings = block.settings
   assign image_sizes = '(min-width: 750px) 50vw, 100vw'
+  assign card_available = product.available
+  assign card_price = product.price
+  assign card_compare_at_price = product.compare_at_price
+  assign card_featured_media = product.featured_media
+  assign card_media_count = product.media.size
+  assign color_card_media_ids = '|'
+
+  if color_card_variant != blank
+    assign card_available = color_card_variant.available
+    assign card_price = color_card_variant.price
+    assign card_compare_at_price = color_card_variant.compare_at_price
+    assign color_card_handle = color_card_value | handleize
+    assign card_media_count = 0
+
+    for media in product.media
+      capture media_color
+        render 'product-media-color-segment', media: media
+      endcapture
+      assign media_color = media_color | strip
+      if media_color == color_card_handle
+        assign color_card_media_ids = color_card_media_ids | append: media.id | append: '|'
+        assign card_media_count = card_media_count | plus: 1
+        if card_media_count == 1
+          assign card_featured_media = media
+        endif
+      endif
+    endfor
+
+    if card_media_count == 0 and color_card_variant.featured_image != blank
+      assign card_featured_media = product.media | where: 'src', color_card_variant.featured_image.src | first
+    endif
+    if card_featured_media == blank
+      assign card_featured_media = color_card_variant.featured_media | default: product.featured_media
+    endif
+    if card_media_count == 0 and card_featured_media != blank
+      assign color_card_media_ids = color_card_media_ids | append: card_featured_media.id | append: '|'
+      assign card_media_count = 1
+    endif
+  endif
 
   # Check if product has badges and determine position
   assign has_badges = false
   assign badge_position = null
   if product != blank
-    if product.available == false or product.compare_at_price > product.price
+    if card_available == false or card_compare_at_price > card_price
       assign has_badges = true
       assign badge_position = settings.badge_position
     endif
@@ -49,7 +91,11 @@
   endif
 
   assign ratio = '1'
-  case block_settings.image_ratio
+  assign image_ratio = block_settings.image_ratio
+  if color_card_variant != blank and image_ratio == blank
+    assign image_ratio = 'portrait'
+  endif
+  case image_ratio
     when 'landscape'
       assign ratio = '16 / 9'
     when 'portrait'
@@ -57,10 +103,10 @@
     when 'square'
       assign ratio = '1'
     when 'adapt'
-      assign ratio = product.featured_media.preview_image.aspect_ratio | default: '1'
+      assign ratio = card_featured_media.preview_image.aspect_ratio | default: '1'
   endcase
 
-  if block_settings.image_ratio == 'adapt' and block_settings.constrain_to_viewport
+  if image_ratio == 'adapt' and block_settings.constrain_to_viewport
     if block_settings.constrain_to_viewport != ''
       assign constrain_to_viewport = true
       assign media_fit = block_settings.constrain_to_viewport
@@ -77,25 +123,25 @@
     --gallery-aspect-ratio: {{ ratio }};
   "
   data-product-id="{{ product.id }}"
-  {% if settings.show_second_image_on_hover and product.media.size > 1 %}
+  {% if settings.show_second_image_on_hover and card_media_count > 1 %}
     on:pointerenter="/previewImage"
     on:pointerleave="/resetImage"
   {% endif %}
   {% if settings.transition_to_main_product %}
     data-view-transition-to-main-product
   {% endif %}
-  data-image-ratio="{{ block_settings.image_ratio }}"
+  data-image-ratio="{{ image_ratio }}"
   {{ block.shopify_attributes }}
 >
-  {%- if product.media.size > 0 -%}
+  {%- if card_media_count > 0 -%}
     <a
       class="contents"
       ref="cardGalleryLink"
-      href="{{ product.url }}"
-      aria-label="{{- product.title -}}"
+      href="{% if color_card_variant != blank %}{{ color_card_variant.url }}{% else %}{{ product.url }}{% endif %}"
+      aria-label="{{- product.title -}}{% if color_card_value != blank %} - {{ color_card_value | escape }}{% endif %}"
     >
       {% liquid
-        assign featured_media = product.featured_media
+        assign featured_media = card_featured_media
 
         assign featured_media_loading = 'lazy'
         assign featured_media_sizes = 'auto, ' | append: image_sizes
@@ -114,7 +160,7 @@
 
         assign featured_media_class = media_class | replace: '[media_type]', featured_media.media_type | append: media_class_suffix
       %}
-      {%- if product.media.size == 1 -%}
+      {%- if card_media_count == 1 -%}
         <div
           class="{{ featured_media_class }}"
           style="--product-media-fit: {{ media_fit | default: 'cover' }};"
@@ -135,10 +181,16 @@
           # Sort media so product.featured_media.preview_image comes first as that is the most relevant image to display
           # product.featured_media updates based on search context and filters applied
 
-          assign other_media = product.media | reject: 'src', product.featured_media
-          assign media_list_to_show = product.featured_media | concat: other_media
+          if color_card_variant != blank
+            assign variant_images = empty | split: ','
+            assign generic_media_size = card_media_count
+            assign media_list_to_show = product.media
+          else
+            assign other_media = product.media | reject: 'src', product.featured_media
+            assign media_list_to_show = product.featured_media | concat: other_media
+          endif
 
-          if product.media.size > 2 and generic_media_size > 0
+          if card_media_count > 2 and generic_media_size > 0
             assign show_arrows = true
           endif
 
@@ -151,7 +203,15 @@
           endif
 
           capture slides
+            assign color_slide_index = 0
             for media in media_list_to_show
+              if color_card_variant != blank
+                assign media_token = '|' | append: media.id | append: '|'
+                unless color_card_media_ids contains media_token
+                  continue
+                endunless
+              endif
+
               assign hidden = false
               assign attributes = ''
               if variant_images contains media.src
@@ -165,7 +225,16 @@
 
               # Performance improvement: don't render more than 5 visible images into the slideshow
               # We'll keep the images that we need for the variant images and hover next.
-              if forloop.first
+              if color_card_variant != blank
+                assign slide_is_first = false
+                if color_slide_index == 0
+                  assign slide_is_first = true
+                endif
+              else
+                assign slide_is_first = forloop.first
+              endif
+
+              if slide_is_first
                 assign visible_slide_count = 0
               endif
               unless hidden
@@ -175,7 +244,7 @@
                 continue
               endif
 
-              if forloop.first
+              if slide_is_first
                 assign loading = featured_media_loading
                 assign sizes = featured_media_sizes
               else
@@ -189,7 +258,12 @@
                 render 'product-media', media: media, sizes: sizes, loading: loading, preview_image_only: true
               endcapture
 
-              render 'slideshow-slide', slide_id: media.id, index: forloop.index0, hidden: hidden, class: class, attributes: attributes, children: slideshow_children, media_fit: media_fit
+              assign slide_index = forloop.index0
+              if color_card_variant != blank
+                assign slide_index = color_slide_index
+                assign color_slide_index = color_slide_index | plus: 1
+              endif
+              render 'slideshow-slide', slide_id: media.id, index: slide_index, hidden: hidden, class: class, attributes: attributes, children: slideshow_children, media_fit: media_fit
             endfor
           endcapture
 
@@ -202,7 +276,7 @@
           ref: 'slideshow',
           initial_slide: 0,
           slides: slides,
-          slide_count: media_list_to_show.size,
+          slide_count: card_media_count,
           show_arrows: show_arrows,
           attributes: slideshow_attributes
         %}

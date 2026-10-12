@@ -407,6 +407,8 @@
     "comparison_slider": "شريط تمرير المقارنة"
   },
   "options": {
+    "color_card_label_below_title": "تسمية اللون أسفل العنوان",
+    "color_card_title_suffix": "عنوان المنتج - اللون",
     "above_carousel": "أعلى العرض الدائري",
     "accent": "تمييز",
     "all": "الكل",
@@ -945,6 +947,8 @@
     "product_card_carousel": "إظهار العرض الدائري",
     "product_cards": "بطاقات المنتج",
     "product_count": "عدد المنتجات",
+    "color_card_title_format": "تنسيق عنوان بطاقة اللون",
+    "show_each_color_as_own_card": "عرض كل لون كبطاقة مستقلة",
     "product_pages": "صفحات المنتجات",
     "product_templates": "قوالب المنتجات",
     "product_title_case": "حالة أحرف عنوان المنتج",

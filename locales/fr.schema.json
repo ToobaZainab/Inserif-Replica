@@ -229,6 +229,8 @@
     "limit_content_width": "Limiter la largeur du contenu",
     "color_scheme": "Combinaison de couleurs",
     "product_count": "Nombre de produits",
+    "color_card_title_format": "Format du titre de la carte couleur",
+    "show_each_color_as_own_card": "Afficher chaque couleur comme une carte distincte",
     "product_type": "Type de produit",
     "content_width": "Largeur du contenu",
     "collection": "Collection",
@@ -587,6 +589,8 @@
     "title_preset": "Préréglage du titre"
   },
   "options": {
+    "color_card_label_below_title": "Libellé de couleur sous le titre",
+    "color_card_title_suffix": "Titre du produit - couleur",
     "apple": "Pomme",
     "arrow": "Flèche",
     "banana": "Banane",
